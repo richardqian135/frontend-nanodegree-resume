@@ -15,6 +15,7 @@ replace the %data% placeholder text you see in them.
 var HTMLheaderName = '<h1 id="name">%data%</h1>';
 var HTMLheaderRole = '<span>%data%</span><hr/>';
 
+//var HTMLcontactStart = '<ul id="skills" class="flex-box"></ul>';
 var HTMLcontactGeneric = '<li class="flex-item"><span class="orange-text">%contact%</span><span class="white-text">%data%</span></li>';
 var HTMLmobile = '<li class="flex-item"><span class="orange-text">mobile</span><span class="white-text">%data%</span></li>';
 var HTMLemail = '<li class="flex-item"><span class="orange-text">email</span><span class="white-text">%data%</span></li>';
@@ -64,7 +65,7 @@ The International Name challenge in Lesson 2 where you'll create a function that
 */
 $(document).ready(function() {
   $('button').click(function() {
-    var iName = inName(name) || function(){};
+    var iName = inName(bio.name) || function(){};
     $('#name').html(iName);  
   });
 });
@@ -128,17 +129,17 @@ function initializeMap() {
 
     // iterates through school locations and appends each location to
     // the locations array
+	/*
     for (var school in education.schools) {
       locations.push(education.schools[school].location);
-    }
+    }*/
 
     // iterates through work locations and appends each location to
     // the locations array
     for (var job in work.jobs) {
       locations.push(work.jobs[job].location);
     }
-
-    return locations;
+	return locations;
   }
 
   /*
@@ -150,36 +151,49 @@ function initializeMap() {
 
     // The next lines save location data from the search result object to local variables
     var lat = placeData.geometry.location.k;  // latitude from the place service
-    var lon = placeData.geometry.location.B;  // longitude from the place service
+    var lon = placeData.geometry.location.D;  // longitude from the place service
     var name = placeData.formatted_address;   // name of the place from the place service
     var bounds = window.mapBounds;            // current boundaries of the map window
-
+	var positionLatlng = new google.maps.LatLng(lat, lon);
+	//console.log(placeData);
+	//console.log(lat + ";" + lon);
     // marker is an object with additional data about the pin for a single location
+	var contentString = '<div id="content">'+
+      '<div id="siteNotice">'+
+      '</div>'+
+      '<h1 id="firstHeading" class="firstHeading">' + name + '</h1>' +
+      '<div id="bodyContent">'+
+      ''+
+      '</div>'+
+      '</div>';
+	  
     var marker = new google.maps.Marker({
       map: map,
-      position: placeData.geometry.location,
+      position: positionLatlng,
       title: name
     });
-
+	//console.log(marker.position);
     // infoWindows are the little helper windows that open when you click
     // or hover over a pin on a map. They usually contain more information
     // about a location.
     var infoWindow = new google.maps.InfoWindow({
-      content: name
+      content: contentString
     });
-
+	//console.log("after infoWindow");
     // hmmmm, I wonder what this is about...
     google.maps.event.addListener(marker, 'click', function() {
       // your code goes here!
+	  infoWindow.open(map,marker);
+	  console.log("clicked");
     });
 
     // this is where the pin actually gets added to the map.
-    // bounds.extend() takes in a map location object
-    bounds.extend(new google.maps.LatLng(lat, lon));
+    //bounds.extend() takes in a map location object
+   	bounds.extend(positionLatlng);
     // fit the map to the new marker
-    map.fitBounds(bounds);
+   	map.fitBounds(bounds);
     // center the map
-    map.setCenter(bounds.getCenter());
+   	map.setCenter(bounds.getCenter());
   }
 
   /*
@@ -187,9 +201,9 @@ function initializeMap() {
   If so, it creates a new map marker for that location.
   */
   function callback(results, status) {
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
+	if (status == google.maps.places.PlacesServiceStatus.OK) {
       createMapMarker(results[0]);
-    }
+	}
   }
 
   /*
@@ -197,8 +211,7 @@ function initializeMap() {
   and fires off Google place searches for each location
   */
   function pinPoster(locations) {
-
-    // creates a Google place search service object. PlacesService does the work of
+	// creates a Google place search service object. PlacesService does the work of
     // actually searching for location data.
     var service = new google.maps.places.PlacesService(map);
 
@@ -208,8 +221,7 @@ function initializeMap() {
       // the search request object
       var request = {
         query: locations[place]
-      };
-
+      };	  
       // Actually searches the Google Maps API for location data and runs the callback
       // function with the search results after each search.
       service.textSearch(request, callback);
@@ -233,11 +245,11 @@ Uncomment the code below when you're ready to implement a Google Map!
 */
 
 // Calls the initializeMap() function when the page loads
-//window.addEventListener('load', initializeMap);
+window.addEventListener('load', initializeMap);
 
 // Vanilla JS way to listen for resizing of the window
 // and adjust map bounds
-//window.addEventListener('resize', function(e) {
+window.addEventListener('resize', function(e) {
   // Make sure the map bounds get updated on page resize
-//  map.fitBounds(mapBounds);
-//});
+	map.fitBounds(mapBounds);
+});
